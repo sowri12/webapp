@@ -9,6 +9,7 @@ const bcrypt = require("bcrypt");
 app.use(cors());
 app.use(bodyParser.json());
 
+//Adding Bcrypt to the password
 app.post("/client", (req, res) => {
   bcrypt.hash(req.body.Password, saltRounds, function (err, hash) {
     addData({
