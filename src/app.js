@@ -6,6 +6,7 @@ const connect = mysql.createConnection({
   user: "root",
   password: "Password",
 });
+
 connect.connect((connectionError, res) => {
   if (connectionError) throw connectionError;
   console.log("Connected");
