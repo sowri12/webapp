@@ -1,25 +1,34 @@
 const express = require("express");
-const { addData, getData, putData } = require("../model/client");
+const {
+  addDataObject,
+  getDataObject,
+  putDataObject,
+  addData,
+} = require("../model/client");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const app = express();
 const saltRounds = 10;
-const uuid = require("uuid/v1");
+// const uuid = require("uuid");
 const bcrypt = require("bcrypt");
+
 app.use(cors());
 app.use(bodyParser.json());
+
+let bCrypting = (bodyPassword)=>{
+  bcrypt.hash(req.body.Password, saltRounds, function (err, hash) {
+    return hash;
+  })
+}
 
 //Adding Bcrypt to the password
 app.post("/client", (req, res) => {
   bcrypt.hash(req.body.Password, saltRounds, function (err, hash) {
     addData({
-      id: uuid(),
       FirstName: req.body.FirstName,
       LastName: req.body.LastName,
       EmailID: req.body.EmailID,
       Password: hash,
-      Account_Created: "2022-01-01 11:00:00",
-      LastUpdated: "2022-01-01 01:01:01",
     });
     res.send({ output: "client created" });
     if (err) throw err;
@@ -27,20 +36,21 @@ app.post("/client", (req, res) => {
 });
 
 app.get("/client", (req, res) => {
-  const EncodedNamePassword = req.headers.authorization.split(" ")[1];
-  const DecodedNamePassword = Buffer.from(
-    EncodedNamePassword,
+  const EncodedClientNamePassword = req.headers.authorization.split(" ")[1];
+  const DecodedClientNamePassword = Buffer.from(
+    EncodedClientNamePassword,
     "base64"
   ).toString("ascii");
-  const userNameDecoded = DecodedNamePassword.split(":")[0];
-  const passwordDecoded = DecodedNamePassword.split(":")[1];
+  const userNameDecoded = DecodedClientNamePassword.split(":")[0];
+  const passwordDecoded = DecodedClientNamePassword.split(":")[1];
   let retrievedData = null;
-  bcrypt.compare(passwordDecoded, founduser.pass, function (err, result) {
+  bcrypt.compare(passwordDecoded, , function (err, result) {
     if (result === true) {
       res.send(result);
     }
   });
-  getData({
+
+  getDataObject({
     EmailID: userNameDecoded,
     Password: passwordDecoded,
   }).then((result) => {
@@ -65,7 +75,7 @@ app.put("/client", (req, res) => {
   const passwordDecoded = DecodedNamePassword.split(":")[1];
   let retrievedData = null;
 
-  putData({
+  putDataObject({
     EmailID: userNameDecoded,
     Password: passwordDecoded,
     FirstName: req.body.FirstName,
