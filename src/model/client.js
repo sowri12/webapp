@@ -97,4 +97,5 @@ module.exports = {
   addData,
   getData,
   putData,
+  getDataWithoutPass,
 };
