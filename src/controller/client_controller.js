@@ -4,31 +4,56 @@ const {
   getDataObject,
   putDataObject,
   addData,
+  putData,
+  getData
 } = require("../model/client");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const app = express();
 const saltRounds = 10;
+const salting =bcrypt.genSaltSync(10);
 // const uuid = require("uuid");
 const bcrypt = require("bcrypt");
 
 app.use(cors());
 app.use(bodyParser.json());
 
-let bCrypting = (bodyPassword)=>{
-  bcrypt.hash(req.body.Password, saltRounds, function (err, hash) {
-    return hash;
-  })
+let bCrypting = (Password)=>{
+  return bcrypt.hashSync(Password, salting);
 }
+
+let ValidObject = (obj) => {
+  if (Object.keys(obj).length === 0 || obj === undefined || obj === ''|| obj === null ) {
+    return false;
+  } else {
+    return true;
+  }
+};
 
 //Adding Bcrypt to the password
 app.post("/client", (req, res) => {
+  if(ValidObject(req.body)){
+    if (req.body.FirstName === undefined ||req.body.Password === undefined || req.body.LastName === undefined || req.body.EmailID === undefined ) {
+      res.status(400);
+      res.send({ output: "Invalid request" });
+  }else{
+    if(Object.keys(req.body).length > 4){
+      console.log(Object.keys(req.body).length," Keys Length");
+      res.send(400);
+      res.send({output: InvalidRequest})
+    }else{
+      console.log(Object.keys(req.body).length,"KeysLength");
+
+    }
+  }
   bcrypt.hash(req.body.Password, saltRounds, function (err, hash) {
     addData({
       FirstName: req.body.FirstName,
       LastName: req.body.LastName,
       EmailID: req.body.EmailID,
       Password: hash,
+    }).then((result)=>{
+      
     });
     res.send({ output: "client created" });
     if (err) throw err;
@@ -85,6 +110,18 @@ app.put("/client", (req, res) => {
     console.log(result);
     res.send({ output: "client got updated" });
   });
+});
+
+//Error handling in json
+app.use((Error, req, res, next) => {
+  if (Error instanceof SyntaxError && Error.status === 400 && 'body' in Error) {
+    let formatError = {
+      status: Error.statusCode,
+      message: Error.message
+    }
+    return res.status(Error.statusCode).json(formatError); // Bad request
+  }
+  next();
 });
 
 app.listen(3080, () => {
